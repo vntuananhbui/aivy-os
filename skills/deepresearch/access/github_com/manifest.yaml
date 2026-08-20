@@ -1,0 +1,21 @@
+description: >-
+  Fetches GitHub repository metadata (title, owner, description, stars, topics, files) from github.com HTML pages.
+params_schema:
+  function:
+    type: string
+    required: true
+    description: |
+      要调用的功能名。可用值:
+        - repo_metadata   获取仓库元数据和根目录文件列表；需要 owner+repo 或 url
+  owner:
+    type: string
+    required: false
+    description: 仓库拥有者/组织名，用于 repo_metadata（可与 repo 一起提供，或从 url 推断）。
+  repo:
+    type: string
+    required: false
+    description: 仓库名称，用于 repo_metadata（可与 owner 一起提供，或从 url 推断）。
+  url:
+    type: string
+    required: false
+    description: 完整的 GitHub 仓库 URL，用于 repo_metadata（可替代 owner+repo）。

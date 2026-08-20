@@ -1,0 +1,49 @@
+import type { Metadata } from "next";
+import { Fraunces, Instrument_Sans, JetBrains_Mono } from "next/font/google";
+import { ThemeProvider } from "next-themes";
+import { SettingsProvider } from "@/components/settings/SettingsProvider";
+import { ConnectedSourcesProvider } from "@/components/shell/ConnectedSourcesProvider";
+import "./globals.css";
+
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
+  subsets: ["latin"],
+  axes: ["opsz"],
+});
+
+const instrument = Instrument_Sans({
+  variable: "--font-instrument",
+  subsets: ["latin"],
+});
+
+const jetbrains = JetBrains_Mono({
+  variable: "--font-jetbrains",
+  subsets: ["latin"],
+});
+
+export const metadata: Metadata = {
+  title: "AIVY",
+  description: "AIVY — agentic search, forged from many agents",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html
+      lang="en"
+      className={`${fraunces.variable} ${instrument.variable} ${jetbrains.variable} h-full antialiased`}
+      suppressHydrationWarning
+    >
+      <body className="h-full">
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
+          <SettingsProvider>
+            <ConnectedSourcesProvider>{children}</ConnectedSourcesProvider>
+          </SettingsProvider>
+        </ThemeProvider>
+      </body>
+    </html>
+  );
+}

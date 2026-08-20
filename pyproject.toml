@@ -1,0 +1,111 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "searchos"
+version = "0.1.0"
+description = "Schedule search agents the way an OS schedules processes."
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+authors = [
+    { name = "Yuyao Zhang" },
+    { name = "Junjie Gao" },
+]
+keywords = [
+    "agentic-search",
+    "information-retrieval",
+    "multi-agent-systems",
+    "open-domain-research",
+    "search-agents",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: MacOS",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+    # 直接导入的运行时依赖必须在这里显式声明，不能依赖其他包顺带安装。
+    "certifi>=2024.8.30",
+    "langchain-core>=1.2.0",
+    "langchain>=1.0.0,<2.0.0",
+    "langchain-openai>=1.0.0",
+    "openai>=1.0.0,<3.0.0",
+    # 各厂商 coding plan（GLM/Kimi/MiniMax/Qwen/火山…）均走 Anthropic 协议端点，
+    # 因此 langchain-anthropic 是核心依赖而非可选。
+    "langchain-anthropic>=0.3.0",
+    "langgraph>=1.0.0",
+    # quickchat conversation-history checkpointer. Swap for
+    # langgraph-checkpoint-postgres (same BaseCheckpointSaver interface) when
+    # moving off SQLite — see ai/quickchat/persistence/checkpointer.py.
+    "langgraph-checkpoint-sqlite>=3.0.0",
+    "deepagents>=0.4.0",
+    "pydantic>=2.0.0",
+    "pydantic-settings>=2.0.0",
+    "python-dotenv>=1.0.0",
+    "PyYAML>=6.0.0",
+    "httpx>=0.28.0",
+    "requests>=2.32.0",
+    "tiktoken>=0.7.0",
+    "rich>=14.2.0",
+    "textual>=8.0",
+    "aiohttp>=3.13.5",
+    "html2text>=2025.4.15",
+    "lxml>=5.3",
+    "fastapi>=0.115.0",
+    "uvicorn>=0.30.0",
+    "loguru>=0.7.0",
+    "python-docx>=1.1.0",
+    "PyPDF2>=3.0.0",
+    "openpyxl>=3.1.0",
+    "python-pptx>=1.0.0",
+]
+
+[project.urls]
+Homepage = "https://antins-labs.github.io/SearchOS/"
+Documentation = "https://github.com/antins-labs/SearchOS/tree/main/docs"
+Repository = "https://github.com/antins-labs/SearchOS"
+Issues = "https://github.com/antins-labs/SearchOS/issues"
+
+[project.scripts]
+searchos = "searchos.cli:main"
+
+[project.optional-dependencies]
+tavily = ["tavily-python>=0.5.0"]
+browser = ["playwright>=1.40.0"]
+crawl4ai = ["crawl4ai>=0.4.0"]
+anthropic = ["langchain-anthropic>=0.3.0"]  # 已进核心依赖；保留 extra 向后兼容
+observability = ["langsmith>=0.2.0"]
+eval = ["pandas>=2.0", "numpy>=1.24"]
+# 仓库内 Access Skill executor 的完整依赖。基础安装保持轻量；一键安装默认启用本组。
+access = [
+    "beautifulsoup4>=4.12.0",
+    "curl-cffi>=0.7.0",
+    "openpyxl>=3.1.0",
+    "pandas>=2.0",
+    "pillow>=10.0.0",
+    "playwright>=1.40.0",
+    "PyPDF2>=3.0.0",
+    "python-dateutil>=2.9.0",
+]
+all = ["searchos[access,tavily,crawl4ai,observability,eval]"]
+dev = ["ruff>=0.4.0"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["searchos", "ai", "backend", "agents", "tools", "connector"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]

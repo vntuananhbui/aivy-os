@@ -1,0 +1,69 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+*.egg
+.venv/
+
+# Env
+.env
+.env.*
+!.env.example
+
+# Workspace (runtime generated)
+searchos_workspace/
+searchos_skill_jobs/
+eval_workspace/
+test_workspace/
+baseline_output/
+eval_results/
+paper/
+
+datasets/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Caches
+.mypy_cache/
+.ruff_cache/
+.page_cache/
+
+# Claude
+.claude/
+# Remotion demo-video project (excluded from OSS release — Remotion license)
+demo_video/
+
+# Local mock route used while producing the product demo
+web/frontend/src/app/demo/
+
+# Web settings overlay (user-local, written by the web UI)
+web_settings.json
+
+# Local design and iteration plans
+/docs
+
+# Local publication assets (not part of the repository)
+doc/pub/assets/
+
+CONTEXT.md
+
+# Local debug/scratch artifacts
+*.log
+log_error.txt
+searchos-personal-team-spec.md
+poc
+data_source
+CODEBASE_OVERVIEW.md
+test_gpt_image.py

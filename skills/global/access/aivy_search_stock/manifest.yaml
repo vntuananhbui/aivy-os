@@ -1,0 +1,14 @@
+description: >
+  Access skill for Vietnamese stock prices (HOSE/HNX/UPCOM) via FireAnt.vn.
+  Searches for the stock's FireAnt page (SF_SEARCH_PROVIDER), fetches it
+  (SF_BROWSER_BACKEND), and parses current price, change, volume, and market
+  cap. Up to 5 symbols per call.
+params_schema:
+  function:
+    type: string
+    required: true
+    description: "Function to call. Only value: check_stock — look up current price/volume/market-cap for one or more ticker symbols."
+  symbols:
+    type: string
+    required: true
+    description: "One or more ticker symbols (e.g. 'VCB' or 'VCB FPT BID'), space/comma-separated. Max 5 per call."
