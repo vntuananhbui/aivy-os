@@ -1,38 +1,30 @@
 """Canonical SearchOS FastAPI application entry point.
 
-Most route modules still live in the legacy ``web/api`` package during the
-incremental migration. This module owns app assembly now; legacy
-``api.main:app`` only re-exports the application from here.
+This module owns application assembly. The web directory contains only the
+frontend and is not added to the Python import path.
 """
 
 from __future__ import annotations
 
 import logging
-import sys
 from contextlib import asynccontextmanager
-from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-# Transitional import bridge: legacy route modules are still importable as
-# ``api.*`` from ``web/``. Remove when they have all moved under ``backend``.
-_REPO_ROOT = Path(__file__).resolve().parents[2]
-_LEGACY_WEB_ROOT = _REPO_ROOT / "web"
-if str(_REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(_REPO_ROOT))
-if str(_LEGACY_WEB_ROOT) not in sys.path:
-    sys.path.insert(0, str(_LEGACY_WEB_ROOT))
-
-from api import settings_store  # noqa: E402
-from api.routes import (  # noqa: E402
+from backend.api.routes import (  # noqa: E402
+    chat,
     connectors,
+    conversations,
     diagnostics,
+    history,
     models,
+    search,
     settings,
+    stream,
     workspace,
 )
-from backend.api.routes import chat, conversations, history, search, stream  # noqa: E402
+from backend.infrastructure.settings import store as settings_store  # noqa: E402
 from poc.api.routes import router as poc_router  # noqa: E402
 
 logging.basicConfig(

@@ -10,7 +10,7 @@ Auth flow and settings-storage shape differ enough per connector (paste-token
 vs OAuth redirect, file/folder selection vs none, ...) that forcing a shared
 request/response schema across connectors before a second real one exists
 would be guessing at requirements nobody has yet — see
-``web/api/routes/connectors.py`` for why that stays sharepoint-specific for
+``backend/api/routes/connectors/sharepoint.py`` for why that stays sharepoint-specific for
 now rather than a generic ``/api/connectors/{type}``. Register a real second
 connector's routes/settings the same way sharepoint's are built, adjusting
 where its actual needs diverge — not by conforming to an invented shape here.

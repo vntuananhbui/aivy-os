@@ -6,8 +6,8 @@ ports. They are replaced by user-scoped database repositories later.
 
 from __future__ import annotations
 
-from api import settings_store
-from api.settings_store import SharePointItem
+from backend.infrastructure.settings import store as settings_store
+from backend.infrastructure.settings.store import SharePointItem
 from backend.application.connectors.models import JiraCredentialData, SharePointSelectionItem
 from connector import cache
 from connector.jira import token_store as jira_token_store

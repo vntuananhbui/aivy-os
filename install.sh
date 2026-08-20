@@ -134,7 +134,7 @@ fi
 echo "执行安装自检…"
 "$VENV_PYTHON" -m pip check
 "$VENV_SEARCHOS" --help >/dev/null
-PYTHONPATH="$ROOT:$ROOT/web" "$VENV_PYTHON" -c 'from api.main import app; assert app.title == "SearchOS API"'
+PYTHONPATH="$ROOT" "$VENV_PYTHON" -c 'from backend.api.main import app; assert app.title == "SearchOS API"'
 
 ACTIVE_SEARCHOS="$(command -v searchos 2>/dev/null || true)"
 if [[ -n "$ACTIVE_SEARCHOS" && "$ACTIVE_SEARCHOS" != "$VENV_SEARCHOS" ]]; then

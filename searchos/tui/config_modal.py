@@ -33,7 +33,7 @@ from textual.widgets.option_list import Option
 
 from searchos.tui.dashboard import ACCENT, C_AGENTS, DANGER, FAINT, MUTED, WARN
 
-# 与 web/api/routes/models.py 的校验保持一致（searchos 不能反向依赖 web 包，
+# 与 backend/api/routes/models.py 的校验保持一致（searchos 不能反向依赖 backend 包，
 # 故常量在此复刻；改动时两处同步）。
 _PROFILE_NAME_RE = re.compile(r"^[a-zA-Z0-9][a-zA-Z0-9._-]{0,63}$")
 _ENV_NAME_RE = re.compile(r"^[A-Z][A-Z0-9_]{0,63}$")

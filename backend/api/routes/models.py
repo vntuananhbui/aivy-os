@@ -18,9 +18,10 @@ from typing import Literal
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
-from api import settings_store, settings_views
-from api.settings_store import store
-from api.settings_views import key_set, models_view
+from backend.application.settings import views as settings_views
+from backend.application.settings.views import key_set, models_view
+from backend.infrastructure.settings import store as settings_store
+from backend.infrastructure.settings.store import store
 
 router = APIRouter(prefix="/api/settings")
 
@@ -265,7 +266,7 @@ async def patch_profile(name: str, req: ProfilePatch):
     """
     from searchos.config.settings import settings
 
-    from api.settings_store import ProfileOverride
+    from backend.infrastructure.settings.store import ProfileOverride
 
     is_custom = name in store.models.custom_profiles
     if not is_custom and name not in settings.profiles:
@@ -336,7 +337,7 @@ async def create_profile(req: ProfileCreate):
     """Create a custom profile. Survives provider switches; deletable."""
     from searchos.config.settings import settings
 
-    from api.settings_store import CustomProfile
+    from backend.infrastructure.settings.store import CustomProfile
 
     if not _PROFILE_NAME_RE.fullmatch(req.name):
         raise HTTPException(400, "Profile name must be alphanumeric with . _ - (max 64 chars)")
@@ -397,7 +398,7 @@ async def delete_profile(name: str):
 async def put_provider_connection(name: str, req: ProviderConnUpsert):
     """Create or update a user-defined provider connection. Model cards point at
     it by name; editing it re-flows to every card that references it."""
-    from api.settings_store import ProviderConnection
+    from backend.infrastructure.settings.store import ProviderConnection
 
     if not _PROFILE_NAME_RE.fullmatch(name):
         raise HTTPException(400, "Connection name must be alphanumeric with . _ - (max 64 chars)")

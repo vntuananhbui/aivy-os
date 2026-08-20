@@ -1,4 +1,3 @@
-from api import main as legacy_main
 from backend.api import main as backend_main
 
 
@@ -8,12 +7,6 @@ def _route_contract(app) -> set[tuple[str, str]]:
         for path, operations in app.openapi()["paths"].items()
         for method in operations
     }
-
-
-def test_legacy_entrypoint_reexports_canonical_backend_app() -> None:
-    assert legacy_main.app is backend_main.app
-    assert legacy_main.create_app is backend_main.create_app
-    assert legacy_main.lifespan is backend_main.lifespan
 
 
 def test_app_factory_preserves_route_contract() -> None:

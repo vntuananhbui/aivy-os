@@ -17,9 +17,8 @@ import os
 from pathlib import Path
 
 # The data model + read/apply path are owned by searchos.config so both the web
-# app and the CLI share one implementation. Re-exported so existing web imports
-# (``from api.settings_store import store`` / ``ProviderConnection`` / …) keep
-# working unchanged.
+# app and the CLI share one implementation. Re-exported here as the backend
+# settings persistence surface.
 from searchos.config.web_overlay import (  # noqa: F401
     DEFAULT_PROVIDER_CONNECTIONS,
     AdvancedOverlay,
@@ -88,7 +87,7 @@ async def update_env(env_updates: dict[str, str], patch_fn=None) -> None:
     from searchos.config import env_file
     from searchos.config.settings import Settings, reload_settings_in_place
 
-    from api import deps
+    from backend.bootstrap.runtime import ENV_FILE_PATH
 
     async with _LOCK:
         prev = {k: os.environ.get(k) for k in env_updates}
@@ -107,7 +106,7 @@ async def update_env(env_updates: dict[str, str], patch_fn=None) -> None:
                     os.environ[key] = value
             raise
 
-        env_file.update_env_file(Path(deps.ENV_FILE_PATH), env_updates)
+        env_file.update_env_file(Path(ENV_FILE_PATH), env_updates)
         reload_settings_in_place(fresh)
         if patch_fn is not None:
             patch_fn(store)

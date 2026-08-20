@@ -17,9 +17,9 @@ from typing import Literal
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
-from api import settings_store, skills_catalog
-from api.settings_store import EffortLevel
-from api.settings_views import (
+from backend.application.research import skill_catalog as skills_catalog
+from backend.application.research.skill_catalog import SKILL_CATEGORIES
+from backend.application.settings.views import (
     advanced_view,
     aggregate_view,
     effort_view,
@@ -27,7 +27,8 @@ from api.settings_views import (
     run_defaults_view,
     skills_view,
 )
-from api.skills_catalog import SKILL_CATEGORIES
+from backend.infrastructure.settings import store as settings_store
+from backend.infrastructure.settings.store import EffortLevel
 
 router = APIRouter(prefix="/api/settings")
 

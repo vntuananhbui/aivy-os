@@ -312,7 +312,7 @@ def test_search_session_does_not_resolve_models_or_backend_adapters() -> None:
     assert not any(module.startswith("backend.") for module in imports)
 
 
-def test_search_http_route_is_backend_owned_and_legacy_route_is_facade() -> None:
+def test_search_http_route_is_backend_owned() -> None:
     canonical = ROOT / "backend" / "api" / "routes" / "search.py"
     forbidden_prefixes = ("api.", "web.api")
     assert not {
@@ -321,28 +321,8 @@ def test_search_http_route_is_backend_owned_and_legacy_route_is_facade() -> None
         if module.startswith(forbidden_prefixes)
     }
 
-    legacy = ROOT / "web" / "api" / "routes" / "search.py"
-    tree = ast.parse(legacy.read_text(encoding="utf-8"), filename=str(legacy))
-    implementations = [
-        node.name
-        for node in tree.body
-        if isinstance(node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef))
-    ]
-    assert implementations == []
-
-
-def test_legacy_research_web_dependencies_are_compatibility_facades() -> None:
-    for path in (
-        ROOT / "web" / "api" / "deps.py",
-        ROOT / "web" / "api" / "skills_catalog.py",
-    ):
-        tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
-        implementations = [
-            node.name
-            for node in tree.body
-            if isinstance(node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef))
-        ]
-        assert implementations == []
+def test_legacy_web_api_package_is_removed() -> None:
+    assert not (ROOT / "web" / "api").exists()
 
 
 def test_research_run_application_layer_does_not_import_infrastructure() -> None:
@@ -374,16 +354,3 @@ def test_research_history_and_stream_routes_are_backend_owned() -> None:
         source = canonical.read_text(encoding="utf-8")
         assert "research_run_service" in source
         assert "sessions.get" not in source
-
-        legacy = ROOT / "web" / "api" / "routes" / name
-        tree = ast.parse(
-            legacy.read_text(encoding="utf-8"), filename=str(legacy)
-        )
-        implementations = [
-            node.name
-            for node in tree.body
-            if isinstance(
-                node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)
-            )
-        ]
-        assert implementations == []

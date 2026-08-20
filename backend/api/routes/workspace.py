@@ -6,7 +6,7 @@ from pathlib import Path
 
 from fastapi import APIRouter, HTTPException, Query
 
-from api.deps import WORKSPACE_ROOT
+from backend.bootstrap.runtime import WORKSPACE_ROOT
 
 router = APIRouter(prefix="/api/workspace")
 

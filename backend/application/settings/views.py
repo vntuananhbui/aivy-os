@@ -9,8 +9,8 @@ from __future__ import annotations
 
 import os
 
-from api import skills_catalog
-from api.settings_store import store
+from backend.application.research import skill_catalog as skills_catalog
+from backend.infrastructure.settings.store import store
 
 
 def key_set(env_name: str, fallback: str = "") -> bool:

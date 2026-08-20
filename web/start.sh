@@ -35,8 +35,8 @@ start_api() {
     echo "当前 Python 环境未安装 SearchOS；请先运行 ./install.sh。" >&2
     return 1
   }
-  # --app-dir web makes the `api` package importable; PYTHONPATH=repo for `searchos`.
-  PYTHONPATH="$REPO" "$PYTHON_BIN" -m uvicorn api.main:app --app-dir web --host 0.0.0.0 --port 8000 --reload
+  # The backend package is importable directly from the repository root.
+  PYTHONPATH="$REPO" "$PYTHON_BIN" -m uvicorn backend.api.main:app --host 0.0.0.0 --port 8000 --reload
 }
 
 start_web() {

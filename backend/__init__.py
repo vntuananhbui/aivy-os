@@ -1,6 +1,1 @@
-"""SearchOS backend package.
-
-Backend-owned HTTP, application, domain and infrastructure modules migrate
-here incrementally from the legacy ``web/api`` package.
-"""
-
+"""SearchOS backend-owned HTTP, application, domain and infrastructure code."""

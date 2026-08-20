@@ -57,7 +57,7 @@ export interface RepairRequest {
   history?: { query: string; answer: string }[];
 }
 
-// ---- Settings (mirrors web/api/routes/settings.py views) ----
+// ---- Settings (mirrors backend/api/routes/settings.py views) ----
 
 export type EffortLevel = "low" | "medium" | "high" | "max";
 
