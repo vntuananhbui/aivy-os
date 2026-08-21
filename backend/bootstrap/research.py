@@ -17,7 +17,7 @@ from backend.infrastructure.research.workspace_factory import (
     FilesystemResearchWorkspaceFactory,
 )
 from searchos.config.settings import settings
-from searchos.skills.catalog.registry import SkillRegistry
+from ai.skills.catalog.registry import SkillRegistry
 
 _RESEARCH_MODEL_ROLES = (
     "orchestrator",
@@ -69,6 +69,7 @@ def create_research_session(
     workspace_root: str | None = None,
     skill_library_path: str = "",
     skill_global_library_path: str = "",
+    generated_skill_library_path: str = "",
     skill_exclude: list[str] | None = None,
     model_overrides: dict[str, BaseChatModel] | None = None,
     skip_synthesis: bool | None = None,
@@ -107,6 +108,10 @@ def create_research_session(
         workspace_root=workspace_root or settings.workspace_root,
         skill_library_path=skill_library_path,
         skill_global_library_path=skill_global_library_path,
+        generated_skill_library_path=(
+            generated_skill_library_path
+            or settings.generated_skill_library_path
+        ),
         skill_exclude=skill_exclude,
         skip_synthesis=(
             settings.skip_synthesis

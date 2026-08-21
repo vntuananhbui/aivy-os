@@ -33,7 +33,7 @@ def _allowed_key_envs() -> set[str]:
     """Env names PUT /keys may write. Computed live, never user-extendable."""
     from searchos.config.providers import PRESETS
     from searchos.config.settings import settings
-    from tools.search import SEARCH_PROVIDER_INFO
+    from ai.tools.search import SEARCH_PROVIDER_INFO
 
     allowed = {p.api_key_env for p in PRESETS.values()}
     allowed |= {p.api_key_env for p in settings.profiles.values()}
@@ -537,7 +537,7 @@ async def put_roles(req: RolesUpdate):
 @router.put("/search-backend")
 async def put_search_backend(req: SearchBackendUpdate):
     from searchos.config.settings import settings
-    from tools.search import SEARCH_PROVIDER_INFO
+    from ai.tools.search import SEARCH_PROVIDER_INFO
 
     if req.provider is not None:
         if req.provider not in SEARCH_PROVIDER_INFO:

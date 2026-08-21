@@ -25,7 +25,15 @@ from backend.api.routes import (  # noqa: E402
     workspace,
 )
 from backend.infrastructure.settings import store as settings_store  # noqa: E402
-from poc.api.routes import router as poc_router  # noqa: E402
+
+try:  # Local demo extension; intentionally absent from production packages.
+    from poc.api.routes import router as poc_router  # type: ignore[import-not-found]
+    from poc import scheduler as poc_scheduler  # type: ignore[import-not-found]
+except ModuleNotFoundError as exc:
+    if exc.name != "poc" and not (exc.name or "").startswith("poc."):
+        raise
+    poc_router = None
+    poc_scheduler = None
 
 logging.basicConfig(
     level=logging.INFO,
@@ -40,13 +48,13 @@ async def lifespan(_app: FastAPI):
     from ai.quickchat.persistence.checkpointer import set_checkpointer
     from backend.infrastructure.database.langgraph_checkpointer import create_sqlite_checkpointer
 
-    from poc import scheduler as poc_scheduler
-
     async with create_sqlite_checkpointer() as checkpointer:
         set_checkpointer(checkpointer)
-        await poc_scheduler.start_loop()
+        if poc_scheduler is not None:
+            await poc_scheduler.start_loop()
         yield
-        await poc_scheduler.stop_loop()
+        if poc_scheduler is not None:
+            await poc_scheduler.stop_loop()
     set_checkpointer(None)
 
 
@@ -76,7 +84,8 @@ def create_app() -> FastAPI:
     app.include_router(models.router)
     app.include_router(diagnostics.router)
     app.include_router(connectors.router)
-    app.include_router(poc_router)
+    if poc_router is not None:
+        app.include_router(poc_router)
 
     @app.get("/api/health")
     async def health():

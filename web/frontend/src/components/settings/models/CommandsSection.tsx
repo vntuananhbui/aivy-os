@@ -13,7 +13,7 @@ const NAME_RE = /^[a-zA-Z0-9_-]{1,32}$/;
 
 /**
  * quickchat "/command" bindings: a command name (e.g. "meeting") mapped to a
- * command-agent type from the fixed catalog (agents/, quickchat/commands/).
+ * command-agent type from the fixed catalog (ai/agents/, ai/quickchat/commands/).
  * The agent picker only ever offers `command_catalog` keys — never a
  * free-text import path, so this UI can't be used to run arbitrary code.
  */

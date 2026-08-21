@@ -52,6 +52,8 @@ def _service(repository):
         repository=repository,
         teams_repository=FakeTeamsRepository(),
         cache_repository=FakeCacheRepository(),
+        connector_factory=lambda _token: None,
+        token_inspector=lambda _token: ({}, ()),
     )
 
 

@@ -111,7 +111,7 @@ export default function ModelsSection() {
         </SubSection>
 
         <SubSection title="Commands"
-          description="Bind a quickchat &quot;/name&quot; message to an agent from the fixed catalog below (agents/, quickchat/commands/) — never a free-text path.">
+          description="Bind a quickchat &quot;/name&quot; message to an agent from the fixed catalog below (ai/agents/, ai/quickchat/commands/) — never a free-text path.">
           <CommandsSection />
         </SubSection>
       </div>

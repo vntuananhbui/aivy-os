@@ -35,8 +35,8 @@ def _setup_provider(no_search: bool) -> None:
     # main() 已在此前 load_and_apply）；overlay 未配时回落 SF_SEARCH_PROVIDER，
     # 再按已有 key 推断（serper → tavily），最后回落内部 ragflow。
     from searchos.config.web_overlay import store
-    from tools.search import build_search_provider
-    from searchos.tools.simple_browser.state import set_browser_provider
+    from ai.tools.search import build_search_provider
+    from ai.research.tools.simple_browser.state import set_browser_provider
     set_browser_provider(build_search_provider(store.models.search_provider or ""))
 
 

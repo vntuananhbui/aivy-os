@@ -36,7 +36,14 @@ start_api() {
     return 1
   }
   # The backend package is importable directly from the repository root.
-  PYTHONPATH="$REPO" "$PYTHON_BIN" -m uvicorn backend.api.main:app --host 0.0.0.0 --port 8000 --reload
+  PYTHONPATH="$REPO" "$PYTHON_BIN" -m uvicorn backend.api.main:app \
+    --host 0.0.0.0 \
+    --port 8000 \
+    --reload \
+    --reload-dir backend \
+    --reload-dir ai \
+    --reload-dir searchos \
+    --reload-dir poc
 }
 
 start_web() {

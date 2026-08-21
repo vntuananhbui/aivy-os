@@ -30,8 +30,8 @@ def init_search_provider(name: str | None = None):
     # An explicit ``name`` (from web settings) wins; otherwise same resolution
     # as the CLI: SF_SEARCH_PROVIDER, else infer from available keys
     # (serper → tavily), else the ragflow fallback.
-    from searchos.tools.simple_browser.state import set_browser_provider
-    from tools.search import build_search_provider
+    from ai.research.tools.simple_browser.state import set_browser_provider
+    from ai.tools.search import build_search_provider
 
     set_browser_provider(build_search_provider(name or ""))
 

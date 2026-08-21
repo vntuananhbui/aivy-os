@@ -27,7 +27,7 @@ from searchos.config.env_file import (
 )
 from searchos.config.providers import PRESET_GROUPS, PRESETS, ProviderPreset, resolve_preset
 
-# 搜索后端选项 — 与 searchos/tools/simple_browser/search/__init__.py 的
+# 搜索后端选项 — 与 ai/research/tools/simple_browser 的
 # SEARCH_PROVIDER_INFO 保持同步（不直接 import：那条链会提前构造 settings 单例）。
 _SEARCH_BACKENDS: list[tuple[str, str, str]] = [
     # (SF_SEARCH_PROVIDER 值, 说明, key 环境变量；空 = 无需 key)

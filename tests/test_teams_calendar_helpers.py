@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from connector.teams.calendar import find_conflicts, graph_utc, normalize_event
+from backend.application.connectors.calendar_helpers import find_conflicts, graph_utc, normalize_event
 
 
 def test_graph_utc_preserves_the_instant() -> None:

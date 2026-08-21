@@ -10,8 +10,7 @@ from backend.application.connectors.repositories import (
     ConnectorCacheRepository,
     JiraConnectionRepository,
 )
-from connector.jira import JiraConnector
-from connector.jira.connector import SOURCE
+from backend.application.connectors.provider_ports import JIRA_SOURCE, JiraProviderFactory
 
 
 @dataclass(frozen=True)
@@ -30,9 +29,11 @@ class JiraConnectorService:
         *,
         repository: JiraConnectionRepository,
         cache_repository: ConnectorCacheRepository,
+        connector_factory: JiraProviderFactory,
     ) -> None:
         self._repository = repository
         self._cache = cache_repository
+        self._connector_factory = connector_factory
 
     async def status(self) -> dict | None:
         return await self._repository.status()
@@ -52,7 +53,7 @@ class JiraConnectorService:
             )
 
         site_url = request.site_url.strip()
-        connector = JiraConnector(
+        connector = self._connector_factory(
             site_url,
             request.auth_mode,
             email=email,
@@ -111,4 +112,4 @@ class JiraConnectorService:
 
     async def disconnect(self) -> None:
         await self._repository.clear()
-        await self._cache.purge_source(SOURCE)
+        await self._cache.purge_source(JIRA_SOURCE)

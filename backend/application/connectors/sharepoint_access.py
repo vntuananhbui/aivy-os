@@ -2,20 +2,19 @@
 
 from __future__ import annotations
 
-from typing import Any, Callable
+from typing import Any
 
 from loguru import logger
 
 from backend.application.connectors.repositories import SharePointConnectionRepository
-from connector.sharepoint.auth import SharePointAuthError
-from connector.sharepoint.client import SharePointGraphError
-from connector.sharepoint.connector import SharePointConnector
-
-_GRAPH_ERRORS = (SharePointAuthError, SharePointGraphError)
+from backend.application.connectors.provider_ports import (
+    SharePointProvider,
+    SharePointProviderFactory,
+)
 
 
 def _graph_error_message(exc: Exception) -> str:
-    if isinstance(exc, SharePointGraphError) and exc.status_code == 404:
+    if getattr(exc, "status_code", None) == 404:
         return (
             f"{exc} — this id may be stale (the search index can lag behind recent "
             "file changes). Search SharePoint again to get a fresh id."
@@ -31,12 +30,12 @@ class SharePointAccessService:
     def __init__(
         self,
         repository: SharePointConnectionRepository,
-        connector_factory: Callable[[str], SharePointConnector] = SharePointConnector,
+        connector_factory: SharePointProviderFactory,
     ) -> None:
         self._repository = repository
         self._connector_factory = connector_factory
 
-    async def _connector(self) -> SharePointConnector | None:
+    async def _connector(self) -> SharePointProvider | None:
         status = await self._repository.status()
         token = await self._repository.get_access_token()
         if not status or not status.get("connected") or not token:
@@ -62,7 +61,7 @@ class SharePointAccessService:
                     [folder.web_url for folder in folders if folder.web_url],
                     max_results=self.MAX_FOLDER_SCOPE_RESULTS,
                 )
-            except _GRAPH_ERRORS as exc:
+            except Exception as exc:
                 return {"success": False, "error": _graph_error_message(exc)}
             results = [
                 {"id": hit.id, "name": hit.title, "url": hit.url, "snippet": hit.snippet}
@@ -84,7 +83,7 @@ class SharePointAccessService:
             if not list_all and len(name_matches) < self.MAX_PICKED_LIST_RESULTS:
                 try:
                     hits = await connector.search(query, max_results=self.MAX_FOLDER_SCOPE_RESULTS)
-                except _GRAPH_ERRORS as exc:
+                except Exception as exc:
                     return {"success": False, "error": _graph_error_message(exc)}
                 picked_ids = {item.id for item in files}
                 seen_ids = {item["id"] for item in results}
@@ -101,7 +100,7 @@ class SharePointAccessService:
 
         try:
             hits = await connector.search(query)
-        except _GRAPH_ERRORS as exc:
+        except Exception as exc:
             return {"success": False, "error": _graph_error_message(exc)}
         return {
             "success": True,
@@ -115,7 +114,7 @@ class SharePointAccessService:
             return {"success": False, "error": "SharePoint connector not configured or not connected."}
         try:
             full_content = await connector.fetch(item_id)
-        except _GRAPH_ERRORS as exc:
+        except Exception as exc:
             return {"success": False, "error": _graph_error_message(exc)}
         offset = max(0, offset)
         chunk = full_content[offset : offset + self.MAX_READ_CHARS]

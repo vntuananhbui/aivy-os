@@ -36,8 +36,9 @@ class SearchBlueprint(CamelModel):
     budget: BudgetConfig = Field(default_factory=BudgetConfig)
 
     # Skills
-    skill_library_path: str = "skills/deepresearch"
-    skill_global_library_path: str = "skills/global"
+    skill_library_path: str = "ai/skills/deepresearch"
+    skill_global_library_path: str = "ai/skills/global"
+    generated_skill_library_path: str = "searchos_workspace/generated_skills/deepresearch"
     skill_max_inject: int = 2
 
     # Tools

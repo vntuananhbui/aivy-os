@@ -57,7 +57,7 @@ def models_view() -> dict:
     from ai.quickchat.commands.catalog import COMMAND_CATALOG
     from searchos.config.providers import active_provider
     from searchos.config.settings import settings
-    from tools.search import (
+    from ai.tools.search import (
         SEARCH_PROVIDER_INFO,
         resolve_search_provider_name,
     )
@@ -194,9 +194,9 @@ def connectors_view() -> dict:
     "connected" (last known state) while the credential itself is gone, so
     both need to agree before the frontend shows "Connected".
     """
-    from connector.sharepoint import token_store
-    from connector.jira import token_store as jira_token_store
-    from connector.teams import token_store as teams_token_store
+    from backend.infrastructure.connectors.sharepoint import token_store
+    from backend.infrastructure.connectors.jira import token_store as jira_token_store
+    from backend.infrastructure.connectors.teams import token_store as teams_token_store
 
     sp = store.connectors.sharepoint
     jira = store.connectors.jira

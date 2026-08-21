@@ -11,9 +11,12 @@ from backend.application.connectors.repositories import (
     SharePointConnectionRepository,
     TeamsConnectionRepository,
 )
-from connector.microsoft_graph.auth import decode_token_claims, delegated_scopes
-from connector.sharepoint import SharePointConnector
-from connector.sharepoint.connector import SOURCE
+from backend.application.connectors.provider_ports import (
+    SHAREPOINT_SOURCE,
+    SharePointProvider,
+    SharePointProviderFactory,
+    TokenInspector,
+)
 
 
 class SharePointConnectorService:
@@ -23,27 +26,30 @@ class SharePointConnectorService:
         repository: SharePointConnectionRepository,
         teams_repository: TeamsConnectionRepository,
         cache_repository: ConnectorCacheRepository,
+        connector_factory: SharePointProviderFactory,
+        token_inspector: TokenInspector,
     ) -> None:
         self._repository = repository
         self._teams_repository = teams_repository
         self._cache = cache_repository
+        self._connector_factory = connector_factory
+        self._token_inspector = token_inspector
 
     async def status(self) -> dict | None:
         return await self._repository.status()
 
-    async def _connector(self) -> SharePointConnector:
+    async def _connector(self) -> SharePointProvider:
         token = await self._repository.get_access_token()
         if not token:
             raise ConnectorServiceError(
                 "authentication_required",
                 "SharePoint is not connected — paste an access token first.",
             )
-        return SharePointConnector(token)
+        return self._connector_factory(token)
 
     async def connect(self, access_token: str) -> dict:
         token = access_token.strip()
-        claims = decode_token_claims(token)
-        scopes = delegated_scopes(token)
+        claims, scopes = self._token_inspector(token)
         logger.info(
             "SharePoint login: token_type={} tenant_id={} client_id={} expires_at={} "
             "delegated_scopes={}",
@@ -53,7 +59,7 @@ class SharePointConnectorService:
             claims.get("exp", "unknown"),
             list(scopes),
         )
-        connector = SharePointConnector(token)
+        connector = self._connector_factory(token)
         try:
             await connector.connect()
         except Exception as exc:
@@ -106,4 +112,4 @@ class SharePointConnectorService:
 
     async def disconnect(self) -> None:
         await self._repository.clear()
-        await self._cache.purge_source(SOURCE)
+        await self._cache.purge_source(SHAREPOINT_SOURCE)

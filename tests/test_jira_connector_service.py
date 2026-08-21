@@ -35,6 +35,7 @@ def _service(repository):
     return jira_service_module.JiraConnectorService(
         repository=repository,
         cache_repository=FakeCacheRepository(),
+        connector_factory=lambda *args, **kwargs: None,
     )
 
 

@@ -2,8 +2,8 @@ import asyncio
 
 import httpx
 
-from connector.microsoft_graph.auth import GraphAuth
-from connector.microsoft_graph.client import GraphClientError, TeamsMeetingClient
+from backend.infrastructure.connectors.microsoft_graph.auth import GraphAuth
+from backend.infrastructure.connectors.microsoft_graph.client import GraphClientError, TeamsMeetingClient
 
 
 class StubTransport(httpx.AsyncBaseTransport):

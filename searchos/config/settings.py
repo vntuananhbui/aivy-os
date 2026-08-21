@@ -198,8 +198,9 @@ class Settings(BaseSettings):
 
     # --- Skill ---
     enable_skills: bool = True
-    skill_library_path: str = "skills/deepresearch"
-    skill_global_library_path: str = "skills/global"
+    skill_library_path: str = "ai/skills/deepresearch"
+    skill_global_library_path: str = "ai/skills/global"
+    generated_skill_library_path: str = "searchos_workspace/generated_skills/deepresearch"
     skill_max_inject: int = 2
     # Access-catalog top-k pre-filter via the ``skill_router`` LLM role; fail-open.
     enable_skill_router: bool = True

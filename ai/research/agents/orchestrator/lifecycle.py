@@ -2,7 +2,7 @@
 
 Spawn → run → collect machinery for the orchestrator's sub-agents, plus the
 prompt / scope / report helpers it needs. The @tool surface lives in
-``searchos.tools.tasks`` (queue) and ``searchos.tools.schema``
+``ai.research.tools.tasks`` (queue) and ``ai.research.tools.schema``
 (schema); this module holds the spawn lifecycle those tools and the Scheduler
 drive. ``_ctx`` and friends are re-exported from ``ai.research.agents.runtime`` so
 the Scheduler / task tools import everything from one place.
@@ -188,7 +188,7 @@ async def _continue_sub_agent_run(
     # spawn; a continuation must repeat it because ContextVars are
     # per-task and the orchestrator's context may have been overwritten
     # by later spawns before this continue coroutine runs.
-    from searchos.tools.search_state import (
+    from ai.research.tools.search_state import (
         set_current_agent, set_current_table, set_current_task,
     )
     set_current_agent(thread_id)
@@ -502,7 +502,7 @@ def _build_writer_socm_block(state: Any) -> str:
     Writer has global drafting responsibility, so it gets an overview
     instead of the task-cells slice that search agents receive.
     """
-    from searchos.tools.socm_read import coverage_summary
+    from ai.research.tools.socm_read import coverage_summary
 
     cmap = getattr(state, "coverage_map", None)
     lines = ["## Coverage Progress"]
@@ -1295,7 +1295,7 @@ async def _spawn_sub_agent(
             control=control_mw, sensor=sensor_mw, extraction=extraction_mw,
         ))
 
-    from searchos.tools.simple_browser import reset_browser_for_sub_agent
+    from ai.research.tools.simple_browser import reset_browser_for_sub_agent
     reset_browser_for_sub_agent()
 
     from deepagents.backends import FilesystemBackend
@@ -1320,7 +1320,7 @@ async def _spawn_sub_agent(
 
     thread_id = agent_label
 
-    from searchos.tools.search_state import (
+    from ai.research.tools.search_state import (
         set_current_agent, set_current_task, set_current_table,
     )
     set_current_agent(thread_id)
@@ -1401,7 +1401,7 @@ async def _collect_sub_agent_result(agent_id: str) -> Any:
     target_table = info.get("target_table", "") or ""
     agent_type = info.get("agent_type", "search_agent")
 
-    from searchos.tools.search_state import (
+    from ai.research.tools.search_state import (
         set_current_agent, set_current_task, set_current_table,
     )
     set_current_agent(thread_id)

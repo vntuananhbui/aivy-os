@@ -21,8 +21,8 @@ def skill_catalog() -> dict[str, list]:
     """Skills grouped by category, straight from the library directory."""
     global _registry
     from searchos.config.settings import settings
-    from searchos.skills.catalog.registry import SkillRegistry
-    from searchos.skills.core.models import SkillCategory
+    from ai.skills.catalog.registry import SkillRegistry
+    from ai.skills.core.models import SkillCategory
 
     repo_root = Path(__file__).resolve().parents[3]
 
@@ -32,7 +32,10 @@ def skill_catalog() -> dict[str, list]:
 
     lib = _resolve(settings.skill_library_path)
     global_lib = _resolve(settings.skill_global_library_path)
-    if not settings.enable_skills or not (lib.exists() or global_lib.exists()):
+    generated_lib = _resolve(settings.generated_skill_library_path)
+    if not settings.enable_skills or not (
+        lib.exists() or global_lib.exists() or generated_lib.exists()
+    ):
         return {name: [] for name in SKILL_CATEGORIES}
 
     if _registry is None:
@@ -42,6 +45,8 @@ def skill_catalog() -> dict[str, list]:
         reg.load_directory(global_lib)
     if lib.exists():
         reg.load_directory(lib)
+    if generated_lib.exists():
+        reg.load_directory(generated_lib)
     return {
         cat.value: sorted(reg.list_by_category(cat), key=lambda s: s.meta.name)
         for cat in (SkillCategory.ORCHESTRATOR, SkillCategory.ACCESS, SkillCategory.STRATEGY)

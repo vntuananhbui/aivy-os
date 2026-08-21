@@ -117,7 +117,7 @@ async def test_provider(req: ProviderTestRequest):
 @router.post("/search")
 async def test_search_backend(req: SearchTestRequest):
     """Run a small real query through the configured search provider."""
-    from tools.search import (
+    from ai.tools.search import (
         build_search_provider,
         resolve_search_provider_name,
     )
@@ -196,7 +196,7 @@ def _proxy_summary() -> dict[str, Any]:
 async def test_browser_backend(req: BrowserTestRequest):
     """Fetch one public URL through the configured page backend and proxy."""
     from searchos.config.settings import settings
-    from tools.backend.base import _build_default_backend
+    from ai.tools.backend.base import _build_default_backend
 
     started = perf_counter()
     backend = None

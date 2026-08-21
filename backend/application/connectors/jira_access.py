@@ -2,14 +2,10 @@
 
 from __future__ import annotations
 
-from typing import Any, Callable
+from typing import Any
 
 from backend.application.connectors.repositories import JiraConnectionRepository
-from connector.jira.auth import JiraAuthError
-from connector.jira.client import JiraApiError
-from connector.jira.connector import JiraConnector
-
-_JIRA_ERRORS = (JiraApiError, JiraAuthError, ValueError)
+from backend.application.connectors.provider_ports import JiraProvider, JiraProviderFactory
 
 
 class JiraAccessService:
@@ -18,12 +14,12 @@ class JiraAccessService:
     def __init__(
         self,
         repository: JiraConnectionRepository,
-        connector_factory: Callable[..., JiraConnector] = JiraConnector,
+        connector_factory: JiraProviderFactory,
     ) -> None:
         self._repository = repository
         self._connector_factory = connector_factory
 
-    async def _connector(self) -> JiraConnector | None:
+    async def _connector(self) -> JiraProvider | None:
         status = await self._repository.status()
         credential = await self._repository.get_credential()
         if not status or not status.get("connected") or credential is None:
@@ -99,6 +95,6 @@ class JiraAccessService:
                     return {"success": False, "error": "Missing required parameter(s): key, transition_name"}
                 status_name = await connector.transition_issue(key, transition)
                 return {"success": True, "key": key, "status": status_name}
-        except _JIRA_ERRORS as exc:
+        except Exception as exc:
             return {"success": False, "error": str(exc)}
         raise AssertionError(f"Unhandled Jira access function: {function}")

@@ -87,7 +87,7 @@ class EvidenceExtractionMiddleware(AgentMiddleware):
             source_kind = EvidenceSourceKind.SKILL
             delivery = DeliveryMode.SYNC
         else:
-            from searchos.tools.simple_browser import FETCH_ERROR_SENTINEL
+            from ai.research.tools.simple_browser import FETCH_ERROR_SENTINEL
 
             source_url = self._extract_source_url(content)
             if FETCH_ERROR_SENTINEL in content[:200]:
@@ -158,7 +158,7 @@ class EvidenceExtractionMiddleware(AgentMiddleware):
         if len(text) < 50:
             return None
         try:
-            from searchos.tools.search_state import _current_agent_var
+            from ai.research.tools.search_state import _current_agent_var
 
             agent_id = _current_agent_var.get() or ""
         except Exception:
@@ -190,7 +190,7 @@ class EvidenceExtractionMiddleware(AgentMiddleware):
     @staticmethod
     def _current_table() -> str:
         try:
-            from searchos.tools.search_state import _current_table_var
+            from ai.research.tools.search_state import _current_table_var
 
             return _current_table_var.get() or ""
         except Exception:

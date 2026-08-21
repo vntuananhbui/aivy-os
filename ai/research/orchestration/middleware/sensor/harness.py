@@ -1199,7 +1199,7 @@ class HarnessMiddleware(_AgentMiddlewareBase):
         target_tid = task_table_id
         if target_tid not in cmap.tables:
             try:
-                from searchos.tools.search_state import _current_table_var
+                from ai.research.tools.search_state import _current_table_var
                 target_tid = _current_table_var.get() or ""
             except Exception:
                 target_tid = ""
@@ -1273,7 +1273,7 @@ class HarnessMiddleware(_AgentMiddlewareBase):
         # single source of truth for scope — no extra "scope_hint" field
         # to keep in sync.
         try:
-            from searchos.tools.search_state import (
+            from ai.research.tools.search_state import (
                 _current_task_var, _current_table_var,
             )
             task_text = (_current_task_var.get() or "")

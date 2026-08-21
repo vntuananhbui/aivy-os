@@ -8,9 +8,12 @@ from collections.abc import Awaitable, Callable
 from datetime import datetime
 from typing import Any
 
+from backend.application.connectors.provider_ports import (
+    CalendarProvider,
+    CalendarProviderFactory,
+)
 from backend.application.connectors.repositories import TeamsConnectionRepository
-from connector.microsoft_graph import GraphAuth, GraphClientError, TeamsMeetingClient
-from connector.teams.calendar import (
+from backend.application.connectors.calendar_helpers import (
     find_conflicts,
     graph_utc,
     normalize_event,
@@ -46,22 +49,23 @@ def validate_meeting_args(
     return clean_subject, start, end, emails
 
 
-def _graph_error_result(exc: GraphClientError, **extra: Any) -> dict[str, Any]:
+def _graph_error_result(exc: Exception, **extra: Any) -> dict[str, Any]:
+    code = str(getattr(exc, "code", "PROVIDER_ERROR"))
     status = (
         "authentication_required"
-        if exc.code == "TOKEN_INVALID"
+        if code == "TOKEN_INVALID"
         else "permission_required"
-        if exc.code == "MISSING_CALENDAR_PERMISSION"
+        if code == "MISSING_CALENDAR_PERMISSION"
         else "status_unknown"
-        if exc.code == "GRAPH_WRITE_TIMEOUT"
+        if code == "GRAPH_WRITE_TIMEOUT"
         else "failed"
     )
     return {
         "success": False,
         "status": status,
-        "error_code": exc.code,
+        "error_code": code,
         "message": str(exc),
-        "status_code": exc.status_code,
+        "status_code": getattr(exc, "status_code", None),
         **extra,
     }
 
@@ -71,18 +75,16 @@ class CalendarAccessService:
         self,
         repository: TeamsConnectionRepository,
         *,
-        client_factory: Callable[[str], TeamsMeetingClient] | None = None,
+        client_factory: CalendarProviderFactory,
         sleep: Callable[[float], Awaitable[None]] = asyncio.sleep,
         now: Callable[[Any], datetime] = datetime.now,
     ) -> None:
         self._repository = repository
-        self._client_factory = client_factory or (
-            lambda token: TeamsMeetingClient(GraphAuth(token))
-        )
+        self._client_factory = client_factory
         self._sleep = sleep
         self._now = now
 
-    async def _client(self) -> TeamsMeetingClient | None:
+    async def _client(self) -> CalendarProvider | None:
         status = await self._repository.status()
         token = await self._repository.get_access_token()
         if not status or not status.get("connected") or not token:
@@ -113,7 +115,7 @@ class CalendarAccessService:
                 start_datetime_utc=graph_utc(start),
                 end_datetime_utc=graph_utc(end),
             )
-        except GraphClientError as exc:
+        except Exception as exc:
             return _graph_error_result(exc, events=[])
         events = [normalize_event(event) for event in raw if not event.get("isCancelled")]
         if online_only:
@@ -143,7 +145,7 @@ class CalendarAccessService:
                 start_datetime_utc=graph_utc(start),
                 end_datetime_utc=graph_utc(end),
             )
-        except GraphClientError as exc:
+        except Exception as exc:
             return _graph_error_result(exc, conflicts=[])
         conflicts = find_conflicts(events, start, end)
         return {
@@ -206,7 +208,7 @@ class CalendarAccessService:
                 end_datetime_utc=graph_utc(end),
                 attendee_emails=emails,
             )
-        except GraphClientError as exc:
+        except Exception as exc:
             return _graph_error_result(exc, calendar_event_created=False)
 
         normalized = normalize_event(event)
@@ -217,7 +219,7 @@ class CalendarAccessService:
                 await self._sleep(delay_seconds)
             try:
                 normalized = normalize_event(await client.get_calendar_event(event["id"]))
-            except GraphClientError:
+            except Exception:
                 break
         return {
             "success": True,

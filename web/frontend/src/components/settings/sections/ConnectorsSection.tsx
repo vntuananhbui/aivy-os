@@ -12,7 +12,7 @@ import { Card, Row, SectionShell, SubSection } from "@/components/settings/primi
  * NOT the same connector as SharePoint/Jira, which live in the composer's
  * Sources popover (ComposerSourcesPopover.tsx) since they're per-question
  * data sources you attach. Teams isn't attached per-question — it backs
- * agents/meeting_assistant's own Graph calls — so it belongs here instead.
+ * ai/agents/meeting_assistant's own Graph calls — so it belongs here instead.
  * Not wired through SettingsProvider/SettingsData (connectors aren't part of
  * that aggregate today, same reason SharePoint/Jira fetch themselves) — this
  * section owns its own fetch/mutate, mirroring how ChatHistoryRail polls its
@@ -57,7 +57,7 @@ export default function ConnectorsSection() {
     <SectionShell id="connectors" title="Connectors"
       description="External accounts that back agent capabilities directly, rather than a per-question data source (see the composer's Sources popover for SharePoint/Jira).">
       <SubSection title="Microsoft Teams"
-        description="Sign in with your Microsoft account so agents/meeting_assistant can create/find Teams meetings. Its own login and token, separate from SharePoint — the token is kept in memory only, never written to disk, and expires after about an hour.">
+        description="Sign in with your Microsoft account so ai/agents/meeting_assistant can create/find Teams meetings. Its own login and token, separate from SharePoint — the token is kept in memory only, never written to disk, and expires after about an hour.">
         <Card>
           <Row label="Teams" hint={loading ? "Checking…" : connected ? "Connected" : "Not connected"}>
             {loading ? (

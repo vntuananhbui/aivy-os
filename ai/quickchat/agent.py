@@ -17,18 +17,18 @@ from searchos.config.models import get_model_for, resolve_profile
 
 _REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 _QUICKCHAT_SKILL_ROOTS = (
-    _REPOSITORY_ROOT / "skills" / "global",
-    _REPOSITORY_ROOT / "skills" / "quickchat",
+    _REPOSITORY_ROOT / "ai" / "skills" / "global",
+    _REPOSITORY_ROOT / "ai" / "skills" / "quickchat",
 )
 
 _skill_registry = None  # lazy SkillRegistry; load_directory() is mtime-cached per root
 
 
 def _load_access_skills():
-    """Load every access skill quickchat can see: ``skills/global`` (shared
-    with deep-research — aivy_search_stock, sharepoint, ...) and ``skills/quickchat``
+    """Load every access skill quickchat can see: ``ai/skills/global`` (shared
+    with deep-research — aivy_search_stock, sharepoint, ...) and ``ai/skills/quickchat``
     (quickchat-only skills, currently empty — reserved for later)."""
-    from searchos.skills.catalog.registry import SkillRegistry
+    from ai.skills.catalog.registry import SkillRegistry
 
     global _skill_registry
     if _skill_registry is None:
@@ -44,7 +44,7 @@ def _attached_source_prompt(source, *, web_search_enabled: bool) -> str:
     generic over any ``ConnectorSpec``, not hardcoded to sharepoint. Missing
     or malformed skill.md falls back to the note alone rather than breaking
     chat (see ai.quickchat.sources.skill_name_for)."""
-    from searchos.skills.core.models import SkillCategory
+    from ai.skills.core.models import SkillCategory
     from ai.quickchat.sources import skill_name_for
 
     note = prompts.attached_source_priority_note(source.display_name, web_search_enabled=web_search_enabled)
@@ -55,7 +55,7 @@ def _attached_source_prompt(source, *, web_search_enabled: bool) -> str:
         registry = _load_access_skills()
         skill = registry.get(skill_name)
         if skill is None or skill.meta.category != SkillCategory.ACCESS:
-            raise LookupError(f"{skill_name} skill not found under skills/global")
+            raise LookupError(f"{skill_name} skill not found under ai/skills/global")
         return f"{note}\n\n{skill.body}"
     except Exception as exc:  # missing/malformed skill file shouldn't break chat
         logger.warning("quickchat: failed to load {} skill.md, using note only: {}", skill_name, exc)
@@ -72,7 +72,7 @@ def _skill_prompt_addendum(*, sources: list, web_search_enabled: bool) -> str:
     ``ai/quickchat/tools.py::get_chat_tools`` / ``ai/quickchat/sources/``) — a
     future quickchat-only skill needs its own tool wired there first.
     """
-    from searchos.skills.core.models import SkillCategory
+    from ai.skills.core.models import SkillCategory
 
     registry = _load_access_skills()
     parts: list[str] = [
@@ -84,7 +84,7 @@ def _skill_prompt_addendum(*, sources: list, web_search_enabled: bool) -> str:
     try:
         skill = registry.get("aivy_search_stock")
         if skill is None or skill.meta.category != SkillCategory.ACCESS:
-            raise LookupError("aivy_search_stock skill not found under skills/global")
+            raise LookupError("aivy_search_stock skill not found under ai/skills/global")
         parts.append("You also have aivy_search_stock(symbols). " + skill.body)
     except Exception as exc:
         logger.warning("quickchat: failed to load aivy_search_stock skill.md: {}", exc)

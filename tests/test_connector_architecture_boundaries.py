@@ -21,7 +21,7 @@ def test_connector_http_routes_do_not_import_provider_or_persistence_implementat
     forbidden_prefixes = (
         "api.settings_store",
         "api.settings_views",
-        "connector.",
+        "backend.infrastructure.connectors",
         "httpx",
     )
 
@@ -37,18 +37,14 @@ def test_connector_http_routes_do_not_import_provider_or_persistence_implementat
     assert not {name: modules for name, modules in violations.items() if modules}
 
 
-def test_connector_application_services_do_not_import_legacy_persistence() -> None:
+def test_connector_application_services_do_not_import_infrastructure() -> None:
     service_dir = ROOT / "backend" / "application" / "connectors"
-    forbidden = {
-        "api.settings_store",
-        "connector.cache",
-        "connector.teams.token_store",
-        "connector.sharepoint.token_store",
-        "connector.jira.token_store",
-    }
-
     violations = {
-        path.name: sorted(_imports(path) & forbidden)
+        path.name: sorted(
+            module
+            for module in _imports(path)
+            if module.startswith("backend.infrastructure")
+        )
         for path in service_dir.glob("*.py")
     }
 
@@ -57,13 +53,13 @@ def test_connector_application_services_do_not_import_legacy_persistence() -> No
 
 def test_connector_ai_executors_do_not_import_persistence_or_provider_clients() -> None:
     executor_paths = [
-        ROOT / "skills" / "global" / "access" / "sharepoint" / "executor.py",
-        ROOT / "skills" / "global" / "access" / "jira" / "executor.py",
+        ROOT / "ai" / "skills" / "global" / "access" / "sharepoint" / "executor.py",
+        ROOT / "ai" / "skills" / "global" / "access" / "jira" / "executor.py",
     ]
     forbidden_prefixes = (
         "api.settings_store",
-        "connector.sharepoint",
-        "connector.jira",
+        "backend.infrastructure.connectors.sharepoint",
+        "backend.infrastructure.connectors.jira",
     )
     violations = {
         str(path.relative_to(ROOT)): sorted(
@@ -78,17 +74,16 @@ def test_connector_ai_executors_do_not_import_persistence_or_provider_clients() 
 
 def test_connector_packages_do_not_own_langchain_tool_definitions() -> None:
     tool_paths = [
-        ROOT / "connector" / "sharepoint" / "tools.py",
-        ROOT / "connector" / "jira" / "tools.py",
-        ROOT / "connector" / "teams" / "tools.py",
-        ROOT / "agents" / "teams_meeting_action" / "tools.py",
+        ROOT / "backend" / "infrastructure" / "connectors" / "sharepoint" / "tools.py",
+        ROOT / "backend" / "infrastructure" / "connectors" / "jira" / "tools.py",
+        ROOT / "backend" / "infrastructure" / "connectors" / "teams" / "tools.py",
     ]
     forbidden_prefixes = (
         "langchain",
         "api.settings_store",
-        "connector.sharepoint.token_store",
-        "connector.jira.token_store",
-        "connector.teams.token_store",
+        "backend.infrastructure.connectors.sharepoint.token_store",
+        "backend.infrastructure.connectors.jira.token_store",
+        "backend.infrastructure.connectors.teams.token_store",
     )
     violations = {
         str(path.relative_to(ROOT)): sorted(
@@ -115,10 +110,10 @@ def test_ai_tool_adapters_depend_on_services_not_persistence_or_provider_clients
     adapter_dir = ROOT / "ai" / "adapters" / "connectors"
     forbidden_prefixes = (
         "api.settings_store",
-        "connector.sharepoint",
-        "connector.jira",
-        "connector.teams",
-        "connector.microsoft_graph",
+        "backend.infrastructure.connectors.sharepoint",
+        "backend.infrastructure.connectors.jira",
+        "backend.infrastructure.connectors.teams",
+        "backend.infrastructure.connectors.microsoft_graph",
     )
     violations = {
         path.name: sorted(
@@ -131,32 +126,33 @@ def test_ai_tool_adapters_depend_on_services_not_persistence_or_provider_clients
     assert not {name: modules for name, modules in violations.items() if modules}
 
 
-def test_legacy_ai_adapter_package_contains_only_compatibility_facades() -> None:
-    adapter_dir = ROOT / "ai_adapters" / "connectors"
-    for path in adapter_dir.glob("*.py"):
-        tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
-        implementations = [
-            node.name
-            for node in tree.body
-            if isinstance(node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef))
-        ]
-        assert implementations == []
+def test_legacy_ai_adapter_package_is_removed() -> None:
+    assert not (ROOT / "ai_adapters").exists()
 
 
-def test_legacy_teams_agent_package_contains_only_compatibility_facades() -> None:
-    for legacy_dir in (
-        ROOT / "agents" / "teams_meeting_action",
-        ROOT / "agents" / "bot_join",
-        ROOT / "agents" / "meeting_assistant",
-    ):
-        for path in legacy_dir.glob("*.py"):
-            tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
-            implementations = [
-                node.name
-                for node in tree.body
-                if isinstance(node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef))
-            ]
-            assert implementations == []
+def test_legacy_top_level_agents_package_is_removed() -> None:
+    assert not (ROOT / "agents").exists()
+
+
+def test_legacy_top_level_tools_package_is_removed() -> None:
+    assert not (ROOT / "tools").exists()
+
+
+def test_legacy_root_skills_directory_is_removed() -> None:
+    assert not (ROOT / "skills").exists()
+    assert not list((ROOT / "ai" / "skills").rglob(".staging_*"))
+
+
+def test_dynamic_skills_are_written_outside_packaged_ai_skills() -> None:
+    source = (
+        ROOT / "ai" / "skills" / "evolution" / "dynamic_builder.py"
+    ).read_text(encoding="utf-8")
+    assert "searchos_workspace/generated_skills" in source
+    assert 'Path("ai/skills/deepresearch/access")' not in source
+
+
+def test_legacy_top_level_connector_package_is_removed() -> None:
+    assert not (ROOT / "connector").exists()
 
 
 def test_conversation_route_and_service_do_not_import_quickchat_persistence() -> None:
@@ -202,91 +198,9 @@ def test_legacy_top_level_quickchat_package_is_removed() -> None:
     assert not (ROOT / "quickchat").exists()
 
 
-def test_legacy_shared_ai_helpers_are_compatibility_facades() -> None:
-    for path in (
-        ROOT / "searchos" / "agents" / "temporal.py",
-        ROOT / "searchos" / "agents" / "toolset_render.py",
-        ROOT / "searchos" / "agents" / "explore" / "__init__.py",
-        ROOT / "searchos" / "agents" / "search" / "__init__.py",
-        ROOT / "searchos" / "agents" / "writer" / "__init__.py",
-        ROOT / "searchos" / "agents" / "orchestrator" / "prompt.py",
-        ROOT / "searchos" / "agents" / "orchestrator" / "post_mortem_prompt.py",
-        ROOT / "searchos" / "agents" / "orchestrator" / "catalog.py",
-        ROOT / "searchos" / "agents" / "runtime.py",
-        ROOT / "searchos" / "agents" / "orchestrator" / "__init__.py",
-        ROOT / "searchos" / "agents" / "orchestrator" / "lifecycle.py",
-        ROOT / "searchos" / "agents" / "orchestrator" / "scheduler.py",
-        ROOT / "searchos" / "agents" / "orchestrator" / "post_mortem.py",
-        ROOT / "searchos" / "harness" / "blueprint.py",
-        ROOT / "searchos" / "harness" / "repair_planner.py",
-        ROOT / "searchos" / "harness" / "middleware" / "_shared.py",
-        ROOT / "searchos" / "harness" / "middleware" / "__init__.py",
-        ROOT / "searchos" / "harness" / "middleware" / "context" / "__init__.py",
-        ROOT / "searchos" / "harness" / "middleware" / "context" / "control_middleware.py",
-        ROOT / "searchos" / "harness" / "middleware" / "context" / "dynamic_trim.py",
-        ROOT / "searchos" / "harness" / "middleware" / "context" / "layered_context.py",
-    ):
-        tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
-        implementations = [
-            node.name
-            for node in tree.body
-            if isinstance(node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef))
-        ]
-        assert implementations == []
-
-
-def test_legacy_research_runtime_reuses_canonical_context_objects() -> None:
-    from ai.research.agents import runtime as canonical
-    from searchos.agents import runtime as legacy
-
-    assert legacy._ctx is canonical._ctx
-    assert legacy._scheduler_var is canonical._scheduler_var
-
-
-def test_legacy_research_extraction_package_contains_only_facades() -> None:
-    legacy_dir = ROOT / "searchos" / "harness" / "middleware" / "extraction"
-    for path in legacy_dir.rglob("*.py"):
-        tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
-        implementations = [
-            node.name
-            for node in tree.body
-            if isinstance(node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef))
-        ]
-        assert implementations == []
-
-
-def test_legacy_research_sensor_package_contains_only_facades() -> None:
-    legacy_dir = ROOT / "searchos" / "harness" / "middleware" / "sensor"
-    for path in legacy_dir.rglob("*.py"):
-        tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
-        implementations = [
-            node.name
-            for node in tree.body
-            if isinstance(node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef))
-        ]
-        assert implementations == []
-
-
-def test_legacy_research_session_and_report_are_compatibility_facades() -> None:
-    paths = [
-        ROOT / "searchos" / "harness" / "session.py",
-        ROOT / "searchos" / "harness" / "report" / "__init__.py",
-        ROOT / "searchos" / "harness" / "report" / "synthesis.py",
-        ROOT / "searchos" / "harness" / "report" / "eval_table_export.py",
-        ROOT / "searchos" / "harness" / "telemetry" / "trajectory.py",
-        ROOT / "searchos" / "harness" / "telemetry" / "conversation.py",
-        ROOT / "searchos" / "harness" / "telemetry" / "episodic.py",
-        ROOT / "searchos" / "harness" / "telemetry" / "conversation_context.py",
-        ROOT / "searchos" / "socm" / "workspace.py",
-    ]
-    for path in paths:
-        tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
-        implementations = [
-            node.name
-            for node in tree.body
-            if isinstance(node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef))
-        ]
-        assert implementations == []
+def test_legacy_searchos_ai_trees_are_removed() -> None:
+    assert not (ROOT / "searchos" / "agents").exists()
+    assert not (ROOT / "searchos" / "harness").exists()
 
 
 def test_research_ai_does_not_import_legacy_or_backend_telemetry() -> None:

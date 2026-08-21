@@ -25,7 +25,7 @@ from ai.research.telemetry.ports import (
     InMemoryResearchTelemetryFactory,
     ResearchTelemetryFactory,
 )
-from searchos.skills.catalog.registry import SkillRegistry
+from ai.skills.catalog.registry import SkillRegistry
 from searchos.socm import SearchState
 
 logger = logging.getLogger(__name__)
@@ -169,7 +169,7 @@ async def close_browser_service() -> None:
     once before process exit so Playwright doesn't leak background tasks.
     """
     try:
-        from tools.backend.base import BrowserService
+        from ai.tools.backend.base import BrowserService
     except Exception:
         return
     inst = BrowserService._instance  # type: ignore[attr-defined]
@@ -206,6 +206,7 @@ class SearchSession:
         workspace_root: str,
         skill_library_path: str = "",
         skill_global_library_path: str = "",
+        generated_skill_library_path: str = "",
         skill_exclude: list[str] | None = None,
         skip_synthesis: bool,
         telemetry_factory: ResearchTelemetryFactory | None = None,
@@ -237,6 +238,10 @@ class SearchSession:
         self._skill_global_library_path = (
             skill_global_library_path or self._blueprint.skill_global_library_path
         )
+        self._generated_skill_library_path = (
+            generated_skill_library_path
+            or self._blueprint.generated_skill_library_path
+        )
         self._skill_exclude = list(skill_exclude or [])
         self._skip_synthesis = skip_synthesis
         self._telemetry_factory = telemetry_factory or InMemoryResearchTelemetryFactory()
@@ -256,6 +261,9 @@ class SearchSession:
         lib_path = Path(self._skill_library_path)
         if lib_path.exists():
             self._skill_registry.load_directory(lib_path)
+        generated_path = Path(self._generated_skill_library_path)
+        if generated_path.exists():
+            self._skill_registry.load_directory(generated_path)
         return self._skill_registry
 
     async def run(
@@ -323,7 +331,7 @@ class SearchSession:
         # --- Token tracking (per-run, ContextVar-backed) ---
         from searchos.util.token_tracker import start_tracking
         token_usage = start_tracking()
-        from searchos.tools.simple_browser.usage import (
+        from ai.research.tools.simple_browser.usage import (
             start_tracking as start_browser_tracking,
         )
         browser_usage = start_browser_tracking()
@@ -335,7 +343,7 @@ class SearchSession:
         workspace.create()
 
         # --- Reset cross-agent browser state for this fresh session ---
-        from searchos.tools.simple_browser.state import reset_browser, set_source_controls
+        from ai.research.tools.simple_browser.state import reset_browser, set_source_controls
         reset_browser()
         source_controls = set_source_controls(trusted_domains, excluded_domains, web_search_enabled)
 
@@ -398,9 +406,9 @@ class SearchSession:
         # --- Set up orchestrator tools context ---
         from ai.research.agents.orchestrator import get_orchestrator_tools
         from ai.research.agents.runtime import set_orchestrator_context
-        from searchos.tools.simple_browser.state import set_browser_provider
-        from searchos.tools.search_state import set_workspace
-        from searchos.tools.simple_browser.state import _provider
+        from ai.research.tools.simple_browser.state import set_browser_provider
+        from ai.research.tools.search_state import set_workspace
+        from ai.research.tools.simple_browser.state import _provider
 
         set_workspace(workspace)
         set_orchestrator_context(
@@ -454,8 +462,8 @@ class SearchSession:
         # router LLM call. Skipped entirely when enable_skills=False so the
         # orchestrator cannot see or use skills.
         if self._run_config.enable_skills:
-            from searchos.skills.core.models import SkillCategory
-            from searchos.skills.catalog.router import render_playbook
+            from ai.skills.core.models import SkillCategory
+            from ai.skills.catalog.router import render_playbook
             orch_candidates = self._skill_registry.list_by_category(SkillCategory.ORCHESTRATOR)
             if orchestrator_deny:
                 orch_candidates = [
@@ -466,7 +474,7 @@ class SearchSession:
             # Query-driven top-k pre-filter; fail-open (None → full catalog).
             access_allow = None
             if self._run_config.enable_skill_router:
-                from searchos.skills.catalog.router import select_access_skills
+                from ai.skills.catalog.router import select_access_skills
                 access_allow = await select_access_skills(
                     query,
                     self._skill_registry,
@@ -1070,11 +1078,14 @@ class SearchSession:
         if self._run_config.enable_access_skill_generation:
             async def _generate_access_skills() -> None:
                 from pathlib import Path
-                from searchos.skills.evolution.host_miner import (
+                from ai.skills.evolution.host_miner import (
                     generate_access_skills_from_trace,
                 )
                 try:
-                    lib = self._skill_library_path or "skills/deepresearch"
+                    lib = (
+                        self._generated_skill_library_path
+                        or "searchos_workspace/generated_skills/deepresearch"
+                    )
                     reports = await generate_access_skills_from_trace(
                         workspace.trajectory_path,
                         judge_model=self._skill_evolver_model,
@@ -1419,7 +1430,7 @@ async def _run_writer_finalize(
 
     # Rebind current-agent ContextVar so writer tools identify themselves.
     try:
-        from searchos.tools.search_state import set_current_agent
+        from ai.research.tools.search_state import set_current_agent
         set_current_agent(thread_id)
     except Exception:
         pass

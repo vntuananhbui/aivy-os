@@ -5,7 +5,7 @@ for quickchat.
 Why this shape and not the alternatives we evaluated:
 
 - **Not deepagents' ``task()`` framework** — searchos tried it and disabled
-  it (see ``searchos/agents/runtime.py::_neutralize_deepagents_builtins``):
+  it (see ``ai.research.agents.runtime::_neutralize_deepagents_builtins``):
   its subagents ran with the full tool suite (scope leak) and each call
   nested an unbounded agentic loop that blocked the outer agent for minutes.
   Both failure modes are addressed here by construction: the sub-agent only

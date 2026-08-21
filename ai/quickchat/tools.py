@@ -1,7 +1,7 @@
 """Toolset for the plain chat agent.
 
 Deliberately its own lean ``web_search`` instead of reusing the deep-research
-harness's search()/open()/find() trio (searchos/tools/simple_browser/tools.py):
+harness's search()/open()/find() trio (ai/research/tools/simple_browser/tools.py):
 that trio is built for multi-wave research and forces a separate LLM
 round-trip per open() call. Chat just needs one fast answer, so one tool call
 fans out several queries + their top-result page fetches concurrently and
@@ -65,7 +65,7 @@ def get_current_time() -> str:
 @lru_cache(maxsize=1)
 def _aivy_search_stock_executor() -> ModuleType:
     """Load the aivy_search_stock skill's executor.py by path (not a dotted
-    import — ``skills/`` is plain skill content, not a Python package)."""
+    import — ``ai/skills/`` is plain skill content, not a Python package)."""
     path = (
         Path(__file__).resolve().parent.parent
         / "skills" / "global" / "access" / "aivy_search_stock" / "executor.py"
@@ -144,7 +144,7 @@ async def _search_and_fetch_one(
     num_results: int,
     date_restrict: str,
 ) -> str:
-    from tools.backend.base import BrowserService
+    from ai.tools.backend.base import BrowserService
 
     search_started = time.monotonic()
     results = await provider.search(
@@ -214,7 +214,7 @@ def make_web_fetch_tool(effort: str = "medium"):
         Args:
             url (str): Exact HTTP(S) URL returned by web_search.
         """
-        from tools.backend.base import BrowserService
+        from ai.tools.backend.base import BrowserService
 
         thread_id = (config.get("configurable") or {}).get("thread_id", "")
         _fetch_counts[thread_id] += 1
@@ -261,8 +261,8 @@ def make_web_search_tool(effort: str = "medium"):
             date_restrict (str): optional Google freshness window: dN, wN, mN,
                 or yN (for example d7 or m3). Leave empty unless recency matters.
         """
-        from searchos.tools.simple_browser.state import get_provider, set_browser_provider
-        from tools.search import build_search_provider
+        from ai.research.tools.simple_browser.state import get_provider, set_browser_provider
+        from ai.tools.search import build_search_provider
 
         thread_id = (config.get("configurable") or {}).get("thread_id", "")
         _call_counts[thread_id] += 1

@@ -437,8 +437,8 @@ async def run_benchmark(
         root = workspace_root or per_question_root
         return create_research_session(
             workspace_root=root,
-            skill_library_path="skills/deepresearch",
-            skill_global_library_path="skills/global",
+            skill_library_path="ai/skills/deepresearch",
+            skill_global_library_path="ai/skills/global",
             skip_synthesis=True,
         )
 

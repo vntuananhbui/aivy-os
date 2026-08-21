@@ -160,11 +160,11 @@ class ChatSession:
     def _command_graph_for(
         self, agent_type: str, thinking: bool, effort: str, build_key: str | None = None,
     ):
-        from connector.teams import token_store as teams_token_store
+        from ai.adapters.connectors.calendar import is_calendar_configured
         from ai.quickchat.commands.catalog import get_command_spec
         from ai.quickchat.persistence.checkpointer import get_checkpointer
 
-        calendar_connected = bool(teams_token_store.get_token())
+        calendar_connected = is_calendar_configured()
         key = (
             agent_type,
             thinking,

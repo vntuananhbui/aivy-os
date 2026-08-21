@@ -3,7 +3,7 @@ import asyncio
 from backend.application.connectors.jira_access import JiraAccessService
 from backend.application.connectors.models import JiraCredentialData, SharePointSelectionItem
 from backend.application.connectors.sharepoint_access import SharePointAccessService
-from connector.base import ConnectorItem
+from backend.infrastructure.connectors.base import ConnectorItem
 
 
 class SharePointRepository:

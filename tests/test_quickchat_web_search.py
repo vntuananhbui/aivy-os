@@ -4,9 +4,9 @@ import unittest
 from unittest.mock import patch
 
 from ai.quickchat.tools import _relevant_page_excerpt, _search_and_fetch_one
-from tools.backend.base import BrowserService, FetchResult
-from tools.search.base import SearchResult
-from tools.search.google import GoogleSearchProvider
+from ai.tools.backend.base import BrowserService, FetchResult
+from ai.tools.search.base import SearchResult
+from ai.tools.search.google import GoogleSearchProvider
 
 
 class _FakeResponse:

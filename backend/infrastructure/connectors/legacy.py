@@ -9,10 +9,10 @@ from __future__ import annotations
 from backend.infrastructure.settings import store as settings_store
 from backend.infrastructure.settings.store import SharePointItem
 from backend.application.connectors.models import JiraCredentialData, SharePointSelectionItem
-from connector import cache
-from connector.jira import token_store as jira_token_store
-from connector.sharepoint import token_store as sharepoint_token_store
-from connector.teams import token_store as teams_token_store
+from backend.infrastructure.connectors import cache
+from backend.infrastructure.connectors.jira import token_store as jira_token_store
+from backend.infrastructure.connectors.sharepoint import token_store as sharepoint_token_store
+from backend.infrastructure.connectors.teams import token_store as teams_token_store
 from searchos.config.web_overlay import JiraConnection, SharePointConnection, TeamsConnection
 
 

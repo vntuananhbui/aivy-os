@@ -3,7 +3,6 @@ import pytest
 from ai.agents.teams_meeting_action import agent
 from ai.agents.teams_meeting_action import tools
 from ai.agents.teams_meeting_action.tools import validate_meeting_args
-from agents import teams_meeting_action as legacy_teams_meeting_action
 from ai.adapters.connectors.calendar import (
     check_calendar_conflicts,
     create_teams_meeting,
@@ -24,10 +23,6 @@ def test_create_action_stays_registered_for_safe_resume() -> None:
         "create_teams_meeting",
     ]
 
-
-def test_legacy_agent_package_reexports_canonical_agent() -> None:
-    assert legacy_teams_meeting_action.build_agent is agent.build_agent
-    assert legacy_teams_meeting_action.get_tools is agent.get_tools
 
 def test_validate_meeting_args_normalizes_and_deduplicates() -> None:
     subject, start, end, emails = validate_meeting_args(

@@ -1,6 +1,6 @@
 """Fixed catalog of command agents an admin can bind a ``/command`` to.
 
-Mirrors ``searchos/agents/orchestrator/catalog.py::AGENT_CATALOG``'s shape.
+Mirrors ``ai.research.agents.orchestrator.catalog::AGENT_CATALOG``'s shape.
 Deliberately a closed list, not a free-text dotted-path lookup: the admin UI
 (``searchos/tui/config_modal.py``'s Commands section) only lets the admin
 *choose* an ``agent_type`` from here — never type an arbitrary import path —

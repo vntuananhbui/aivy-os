@@ -7,26 +7,31 @@ adapters; HTTP routes and future AI tools depend only on this service.
 
 from __future__ import annotations
 
-import httpx
 from loguru import logger
 
 from backend.application.connectors.errors import ConnectorServiceError
+from backend.application.connectors.provider_ports import TokenInspector, TokenValidator
 from backend.application.connectors.repositories import TeamsConnectionRepository
-from connector.microsoft_graph.auth import GraphAuth, decode_token_claims, delegated_scopes
-from connector.microsoft_graph.client import GRAPH_BASE
 
 
 class TeamsConnectorService:
-    def __init__(self, *, repository: TeamsConnectionRepository) -> None:
+    def __init__(
+        self,
+        *,
+        repository: TeamsConnectionRepository,
+        token_inspector: TokenInspector,
+        token_validator: TokenValidator,
+    ) -> None:
         self._repository = repository
+        self._token_inspector = token_inspector
+        self._token_validator = token_validator
 
     async def status(self) -> dict[str, bool] | None:
         return await self._repository.status()
 
     async def connect(self, access_token: str) -> dict[str, bool]:
         token = access_token.strip()
-        claims = decode_token_claims(token)
-        scopes = delegated_scopes(token)
+        claims, scopes = self._token_inspector(token)
         missing = []
         if "Calendars.ReadWrite" not in set(scopes):
             missing.append("Calendars.ReadWrite")
@@ -46,17 +51,8 @@ class TeamsConnectorService:
                 + ", ".join(missing),
             )
 
-        auth = GraphAuth(token)
         try:
-            async with httpx.AsyncClient(timeout=15.0) as client:
-                response = await client.get(
-                    f"{GRAPH_BASE}/me",
-                    headers={"Authorization": f"Bearer {await auth.get_token()}"},
-                )
-            if response.status_code >= 400:
-                raise RuntimeError(
-                    f"Graph GET /me -> {response.status_code}: {response.text}"
-                )
+            await self._token_validator(token)
         except Exception as exc:
             raise ConnectorServiceError(
                 "connection_failed",

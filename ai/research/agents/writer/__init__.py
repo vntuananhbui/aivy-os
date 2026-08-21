@@ -11,6 +11,6 @@ AGENT_TYPE = "writer_agent"
 
 def get_tools(skill_names: list[str] | None = None) -> list:
     """Outline + section drafting tools (read-only SOCM views included)."""
-    from searchos.tools.writer import get_writer_tools
+    from ai.research.tools.writer import get_writer_tools
 
     return list(get_writer_tools())

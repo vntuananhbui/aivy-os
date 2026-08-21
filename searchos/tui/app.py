@@ -1139,7 +1139,7 @@ class SearchOSApp(App):
         if self._session is None:
             self._session = self._session_factory()
         try:
-            from searchos.skills.core.models import SkillCategory
+            from ai.skills.core.models import SkillCategory
             reg = self._session.ensure_skill_registry()
             return sorted(
                 s.meta.name
@@ -1155,7 +1155,7 @@ class SearchOSApp(App):
         if self._session is None:
             self._session = self._session_factory()
         try:
-            from searchos.skills.core.models import SkillCategory
+            from ai.skills.core.models import SkillCategory
             reg = self._session.ensure_skill_registry()
             cats = (
                 ("orchestrator", SkillCategory.ORCHESTRATOR),
@@ -1341,11 +1341,11 @@ class SearchOSApp(App):
 
     def _cmd_search(self, arg: str) -> None:
         from searchos.config.web_overlay import save_overlay, store
-        from tools.search import (
+        from ai.tools.search import (
             build_search_provider,
             resolve_search_provider_name,
         )
-        from searchos.tools.simple_browser.state import set_browser_provider
+        from ai.research.tools.simple_browser.state import set_browser_provider
 
         name = arg.strip().lower()
         if not name:
@@ -1466,7 +1466,7 @@ class SearchOSApp(App):
 
         from searchos.config.settings import settings
         from searchos.config.web_overlay import store
-        from tools.search import resolve_search_provider_name
+        from ai.tools.search import resolve_search_provider_name
 
         table = Table(
             title="运行参数（/config <项> <值> 修改）", title_style=f"bold {ACCENT}",

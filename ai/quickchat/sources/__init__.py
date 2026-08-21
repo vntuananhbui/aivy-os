@@ -1,12 +1,12 @@
 """Generic "attached source" wiring for quickchat.
 
-Reads ``connector/registry.py``'s active-sources list generically — the
+Reads the backend application's active-source capability list generically — the
 prompt/priority-note logic in ``agent.py`` no longer hardcodes "sharepoint".
 
 Tool *binding* stays per-connector-type (``_SOURCE_TOOLS`` below): a
 connector's actual LangChain tools can't be derived generically from
 ``ConnectorBase`` alone (search/fetch aren't 1:1 with what a chat tool should
-expose — see ``connector/sharepoint/tools.py``'s citation-formatting,
+expose — see ``ai.adapters.connectors.sharepoint``'s citation-formatting,
 pagination, etc.). Registering a new source's tools here is the one line a
 future connector adds; everything else (priority note, parallel-search
 instruction, active-check) is already generic.
@@ -17,13 +17,13 @@ from __future__ import annotations
 from collections.abc import Callable
 from dataclasses import dataclass
 
-from connector.registry import ConnectorSpec, list_active_sources
+from backend.application.connectors.capabilities import ConnectorSpec, list_active_sources
 
 
 @dataclass(frozen=True)
 class SourceTools:
     get_tools: Callable[[], list]
-    # Name of the access skill (skills/global/access/<name>/skill.md) whose
+    # Name of the access skill (ai/skills/global/access/<name>/skill.md) whose
     # body gets pulled into the prompt alongside the generic priority note —
     # None if this source has no skill.md (falls back to the note alone).
     skill_name: str | None = None

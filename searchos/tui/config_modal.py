@@ -672,7 +672,7 @@ def _commands_menu(app) -> MenuBuilder:
 # --------------------------------------------------------------------------
 
 def _set_search_backend(app, v: str) -> str | None:
-    from tools.search import SEARCH_PROVIDER_INFO
+    from ai.tools.search import SEARCH_PROVIDER_INFO
     name = None if v == "auto" else v
     if name in ("serper", "tavily"):
         env = SEARCH_PROVIDER_INFO[name]["api_key_env"]
@@ -683,8 +683,8 @@ def _set_search_backend(app, v: str) -> str | None:
     _sync()
     if not getattr(app, "_no_search", False):
         try:
-            from tools.search import build_search_provider
-            from searchos.tools.simple_browser.state import set_browser_provider
+            from ai.tools.search import build_search_provider
+            from ai.research.tools.simple_browser.state import set_browser_provider
             set_browser_provider(build_search_provider(name or ""))
         except Exception as e:  # noqa: BLE001 — surface a bad key/backend inline
             return f"⚠ 已写入配置，但重建 provider 失败：{e}"
@@ -692,7 +692,7 @@ def _set_search_backend(app, v: str) -> str | None:
 
 
 def _search_section_items(app) -> list[Item]:
-    from tools.search import resolve_search_provider_name
+    from ai.tools.search import resolve_search_provider_name
 
     def _get_backend():
         return _store().models.search_provider or "auto"

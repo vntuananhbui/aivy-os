@@ -25,10 +25,20 @@ class FakeTeamsRepository:
         self.current_status = None
 
 
+async def _accept_token(_token: str) -> None:
+    return None
+
+
+def _service(repository, *, scopes=("Calendars.ReadWrite",)):
+    return teams_service_module.TeamsConnectorService(
+        repository=repository,
+        token_inspector=lambda _token: ({}, scopes),
+        token_validator=_accept_token,
+    )
+
+
 def test_service_rejects_missing_calendar_scope(monkeypatch) -> None:
-    service = teams_service_module.TeamsConnectorService(repository=FakeTeamsRepository())
-    monkeypatch.setattr(teams_service_module, "decode_token_claims", lambda _token: {})
-    monkeypatch.setattr(teams_service_module, "delegated_scopes", lambda _token: ())
+    service = _service(FakeTeamsRepository(), scopes=())
 
     with pytest.raises(ConnectorServiceError) as exc_info:
         asyncio.run(service.connect("token"))
@@ -38,16 +48,14 @@ def test_service_rejects_missing_calendar_scope(monkeypatch) -> None:
 
 
 def test_service_status_requires_config_and_live_token(monkeypatch) -> None:
-    service = teams_service_module.TeamsConnectorService(
-        repository=FakeTeamsRepository({"connected": False})
-    )
+    service = _service(FakeTeamsRepository({"connected": False}))
 
     assert asyncio.run(service.status()) == {"connected": False}
 
 
 def test_disconnect_delegates_to_repository() -> None:
     repository = FakeTeamsRepository({"connected": True})
-    service = teams_service_module.TeamsConnectorService(repository=repository)
+    service = _service(repository)
 
     asyncio.run(service.disconnect())
 

@@ -1,6 +1,6 @@
 from urllib.parse import parse_qs, unquote, urlsplit
 
-from connector.sharepoint.connector import browser_url
+from backend.infrastructure.connectors.sharepoint.connector import browser_url
 
 
 def test_graph_direct_url_becomes_onedrive_ui_url() -> None:

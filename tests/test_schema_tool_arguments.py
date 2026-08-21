@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from searchos.tools.schema import create_schema
+from ai.research.tools.schema import create_schema
 
 
 def test_create_schema_accepts_native_structured_arrays() -> None:

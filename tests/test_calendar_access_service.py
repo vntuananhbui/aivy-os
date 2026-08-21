@@ -47,7 +47,9 @@ def _event(*, event_id="event-1", join_url=""):
 
 
 def test_calendar_service_reports_authentication_required_without_token() -> None:
-    service = CalendarAccessService(TeamsRepository(token=""))
+    service = CalendarAccessService(
+        TeamsRepository(token=""), client_factory=lambda _token: CalendarClient()
+    )
 
     result = asyncio.run(service.check_conflicts(
         "2026-08-20T11:00:00+07:00", "2026-08-20T12:00:00+07:00"

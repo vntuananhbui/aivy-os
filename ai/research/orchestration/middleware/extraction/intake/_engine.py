@@ -705,7 +705,7 @@ class EvidenceIntake:
         )
         if not target_tid:
             try:
-                from searchos.tools.search_state import _current_table_var
+                from ai.research.tools.search_state import _current_table_var
 
                 target_tid = _current_table_var.get()
             except Exception:
@@ -1389,7 +1389,7 @@ class EvidenceIntake:
 
     def _get_sub_agent_task(self, state: Any) -> str:
         try:
-            from searchos.tools.search_state import _current_task_var
+            from ai.research.tools.search_state import _current_task_var
 
             task = _current_task_var.get() or ""
         except Exception:

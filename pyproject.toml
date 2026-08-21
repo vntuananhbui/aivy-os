@@ -101,7 +101,7 @@ all = ["searchos[access,tavily,crawl4ai,observability,eval]"]
 dev = ["ruff>=0.4.0"]
 
 [tool.hatch.build.targets.wheel]
-packages = ["searchos", "ai", "backend", "agents", "tools", "connector"]
+packages = ["searchos", "ai", "backend"]
 
 [tool.ruff]
 line-length = 100

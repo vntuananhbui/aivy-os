@@ -1,7 +1,7 @@
 import base64
 import json
 
-from connector.microsoft_graph.auth import decode_token_claims, delegated_scopes
+from backend.infrastructure.connectors.microsoft_graph.auth import decode_token_claims, delegated_scopes
 
 
 def _jwt(payload: dict) -> str:
